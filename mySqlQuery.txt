@@ -1,0 +1,606 @@
+1.a
+select first_name, last_name
+from user
+where user_id not in(
+    select  publisher_id
+    from advertise
+  
+);
+
+
+1.b
+#show users whom never published advertises or their advertises #has never been confirmed.
+
+SELECT u.user_id, u.first_name, u.last_name
+FROM user u
+LEFT JOIN advertise a ON u.user_id = a.publisher_id
+GROUP BY u.user_id, u.first_name, u.last_name
+HAVING COUNT(a.ad_id) = 0  SUM(a.status = 'accepted') = 0;
+
+
+#only ordinary users
+1.c
+select first_name, last_name
+from user
+where user_id not in(
+    select  publisher_id
+    from advertise
+  
+) and user.type=1;
+
+
+1.d
+SELECT u.user_id, u.first_name, u.last_name
+FROM user u
+LEFT JOIN advertise a ON u.user_id = a.publisher_id
+WHERE u.type = 1
+GROUP BY u.user_id, u.first_name, u.last_name
+HAVING COUNT(a.ad_id) = 0 OR SUM(a.status = 'accepted') = 0;
+___________________________________________________________________________
+2.
+select first_name, last_name
+from user
+where user_id in (
+    select founder_id
+    from shop
+);
+________________________________________________________
+3,4.a
+SELECT 
+    u.user_id,
+    u.first_name,
+    EXTRACT(MONTH FROM a.published_at) AS month,
+    SUM(a.price) AS total_price
+FROM 
+    user u
+JOIN 
+    advertise a ON u.user_id = a.publisher_id
+      
+    
+GROUP BY 
+    u.user_id,
+    EXTRACT(MONTH FROM a.published_at)
+ORDER BY 
+    u.user_id,
+    u.first_name,
+    month;
+
+
+
+3.4.b
+# total price of users accepted advertises during different monthes
+SELECT 
+    u.user_id,
+    u.first_name,
+    EXTRACT(MONTH FROM a.published_at) AS month,
+    SUM(a.price) AS total_price
+FROM 
+    user u
+JOIN 
+    advertise a ON u.user_id = a.publisher_id
+where a.status='accepted'       
+    
+GROUP BY 
+    u.user_id,
+    EXTRACT(MONTH FROM a.published_at)
+ORDER BY 
+    u.user_id,
+    u.first_name,
+    month;
+____________________________________________________________
+5.
+SELECT u.user_id,u.first_name,u.last_name, a.city, COUNT(a.city) AS ad_count
+FROM user u
+LEFT JOIN advertise a ON u.user_id = a.publisher_id
+GROUP BY u.user_id, a.city
+HAVING COUNT(a.city) = 1 OR a.city IS NULL;
+
+________________________________________________________________
+6.a
+#users with latest confirmed published advertise
+SELECT*
+FROM user u
+JOIN (
+  SELECT publisher_id, published_at
+  FROM advertise
+   where advertise.status='accepted'
+  ORDER BY published_at DESC
+  LIMIT 1
+ 
+) a ON u.user_id = a.publisher_id
+ORDER BY a.published_at DESC;
+
+
+6.b:
+SELECT*, a.published_at
+FROM user u
+JOIN (
+  SELECT publisher_id, published_at
+  FROM advertise
+  ORDER BY published_at DESC
+  LIMIT 1
+ 
+) a ON u.user_id = a.publisher_id
+ORDER BY a.published_at DESC;
+_________________________________________________________________
+7.a
+select phone_number, email,first_name,last_name
+from user
+where user_id in(
+    select publisher_id
+    from advertise
+    group by publisher_id
+    having avg(price) >(
+        select avg(price)
+        from advertise
+    )
+);
+
+
+
+
+7.b:
+# show users whose advertises have been confirmed.
+select phone_number, email,first_name,last_name
+from user
+where user_id in(
+    select publisher_id
+    from advertise
+    where advertise.status='accepted'
+    group by publisher_id
+    having avg(price) >(
+        select avg(price)
+        from advertise
+    )
+);
+
+_______________________________
+8.a
+SELECT type,c.name AS category_name, COUNT(*) AS ad_count
+FROM advertise a
+JOIN category c ON a.type = c.cat_id
+GROUP BY c.name;
+
+
+8.b
+#between confirmeds
+SELECT type,c.name AS category_name, COUNT(*) AS ad_count
+FROM advertise a
+JOIN category c ON a.type = c.cat_id
+where a.status='accepted'
+GROUP BY c.name;
+
+
+
+_______________________
+9.
+SELECT 
+    u.first_name,
+    u.last_name
+FROM 
+    user u
+JOIN (
+    SELECT 
+        publisher_id,
+        COUNT(*) as ad_count
+    FROM 
+        advertise
+    WHERE 
+        published_at >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY)
+    GROUP BY 
+        publisher_id
+    ORDER BY 
+        ad_count DESC
+    LIMIT 3
+) top_publishers
+ON u.user_id = top_publishers.publisher_id
+
+
+
+9.b
+--this query also shows the count of published advertises
+SELECT 
+	u.user_id,
+    u.first_name,
+    u.last_name,
+    top_publishers.ad_count
+FROM 
+    user u
+JOIN (
+    SELECT 
+        publisher_id,
+        COUNT(*) as ad_count
+    FROM 
+        advertise
+    WHERE 
+        published_at >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY)
+    GROUP BY 
+        publisher_id
+    ORDER BY 
+        ad_count DESC
+    LIMIT 3
+) top_publishers
+ON u.user_id = top_publishers.publisher_id
+
+
+9.c
+--this calculates only confirmed advertises
+SELECT 
+	u.user_id,
+    u.first_name,
+    u.last_name,
+    top_publishers.ad_count
+FROM 
+    user u
+JOIN (
+    SELECT 
+        publisher_id,
+        COUNT(*) as ad_count
+    FROM 
+        advertise
+    WHERE 
+        published_at >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY)
+        AND advertise.status='accepted'
+    GROUP BY 
+        publisher_id
+    ORDER BY 
+        ad_count DESC
+    LIMIT 3
+) top_publishers
+ON u.user_id = top_publishers.publisher_id
+
+_________________
+
+
+9.D
+--doesnt show the count of published ad and only cares about confirmed ones
+SELECT 
+    u.first_name,
+    u.last_name
+FROM 
+    user u
+JOIN (
+    SELECT 
+        publisher_id,
+        COUNT(*) as ad_count
+    FROM 
+        advertise
+    WHERE 
+        published_at >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY)
+	AND advertise.status='accepted'
+    GROUP BY 
+        publisher_id
+    ORDER BY 
+        ad_count DESC
+    LIMIT 3
+) top_publishers
+ON u.user_id = top_publishers.publisher_id
+
+
+
+
+_______________________________________
+
+10.
+SELECT city, COUNT(*) AS ad_count
+FROM advertise
+WHERE city IN (
+    SELECT cityName
+    FROM city
+    WHERE province = 'Tehran'
+)
+GROUP BY city;
+
+_________________________________
+
+11.
+SELECT DISTINCT a.city,a.publisher_id
+FROM advertise a
+WHERE a.publisher_id = (
+    SELECT u.user_id
+    FROM user u
+    ORDER BY u.registration_date ASC
+    LIMIT 1
+);
+_________________________________
+12.
+SELECT user_id,first_name,last_name
+FROM user
+where user.type=2
+___________________________
+13.a
+SELECT user_id,first_name,last_name
+From user
+where user_id in(
+	SELECT publisher_id
+    from advertise
+    group by publisher_id
+    having(count(*))>=2
+    
+);
+
+#show only users with confirmed advertises
+13.b
+SELECT user_id,first_name,last_name
+From user
+where user_id in(
+	SELECT publisher_id
+    from advertise
+    where status='accepted'
+    group by publisher_id
+	
+    having(count(*))>=2 
+   
+    
+);
+
+#this query also shows the count of confirmed advertises
+13.c
+SELECT 
+    u.user_id,
+    u.first_name,
+    u.last_name,
+    ad_counts.ad_count
+FROM 
+    user u
+JOIN (
+    SELECT 
+        publisher_id,
+        COUNT(*) as ad_count
+    FROM 
+        advertise
+    WHERE 
+        status = 'accepted'
+    GROUP BY 
+        publisher_id
+    HAVING 
+        COUNT(*) >= 2
+) ad_counts
+ON u.user_id = ad_counts.publisher_id;
+
+
+
+#this query also shows the count of all published advertises(confirmed and rejecteds)
+13.d
+SELECT 
+    u.user_id,
+    u.first_name,
+    u.last_name,
+    ad_counts.ad_count
+FROM 
+    user u
+JOIN (
+    SELECT 
+        publisher_id,
+        COUNT(*) as ad_count
+    FROM 
+        advertise
+    GROUP BY 
+        publisher_id
+    HAVING 
+        COUNT(*) >= 2
+) ad_counts
+ON u.user_id = ad_counts.publisher_id;
+___________________________________
+14.
+
+-- these queries show users with published advertises with count of 0 to 2
+select user.user_id,first_name
+from user
+where user_id not in (
+    select publisher_id
+    from advertise
+    where type = (
+		select cat_id
+        from category
+        where category.name='Digital'
+    )
+    group by publisher_id
+    having count(*) >2
+);
+
+
+14.b
+#only confirmed advertises
+SELECT u.user_id, u.first_name
+FROM user u
+WHERE u.user_id NOT IN (
+    SELECT a.publisher_id
+    FROM advertise a
+    JOIN category c ON a.type = c.cat_id
+    WHERE c.name = 'Digital' AND a.status = 'accepted'
+    GROUP BY a.publisher_id
+    HAVING COUNT(*) > 2
+);
+
+__________________
+15.a
+--only accepted advertises
+SELECT u.email, u.phone_number
+FROM user u
+WHERE u.user_id IN (
+    SELECT a.publisher_id
+    FROM advertise a
+    WHERE a.status = 'accepted' 
+    GROUP BY a.publisher_id
+    HAVING COUNT(DISTINCT a.type) = (SELECT COUNT(*) FROM category)
+);
+
+15.b
+SELECT u.email, u.phone_number
+FROM user u
+WHERE u.user_id IN (
+    SELECT a.publisher_id
+    FROM advertise a
+    GROUP BY a.publisher_id
+    HAVING COUNT(DISTINCT a.type) = (SELECT COUNT(*) FROM category)
+);
+______________________
+16.a
+SELECT title
+FROM advertise
+WHERE DATE(published_at) = CURDATE() 
+ORDER BY published_at ASC;
+
+#only confirmed advertises 
+16.b
+
+SELECT title
+FROM advertise
+WHERE DATE(published_at) = CURDATE() and status='accepted'
+ORDER BY published_at ASC;
+
+__________________________
+17.
+SELECT * 
+FROM advertise
+group by ad_id
+ORDER BY view DESC
+limit 1
+offset 1;
+
+_________________________
+18.a
+SELECT 
+    u.first_name,
+    u.last_name,
+    rejection_stats.rejection_percentage
+FROM (
+    SELECT 
+        adApprover_id,
+        100.0 * SUM(CASE WHEN status= 'rejected' THEN 1 ELSE 0 END) / COUNT(*) AS rejection_percentage
+    FROM 
+        advertise
+    GROUP BY 
+        adApprover_id
+    ORDER BY 
+        rejection_percentage DESC
+    LIMIT 1
+) AS rejection_stats
+JOIN user u ON rejection_stats.adApprover_id = u.user_id;
+
+
+18.b
+--list of admins+rejection percentage:
+
+SELECT 
+    u.first_name,
+    u.last_name,
+    rejection_stats.rejection_percentage
+FROM (
+    SELECT 
+        adApprover_id,
+        100.0 * SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) / COUNT(*) AS rejection_percentage
+    FROM 
+        advertise
+    GROUP BY 
+        adApprover_id
+) AS rejection_stats
+JOIN user u ON rejection_stats.adApprover_id = u.user_id
+ORDER BY 
+    rejection_stats.rejection_percentage DESC;
+
+___________________________________
+19.
+UPDATE user u
+JOIN (
+    SELECT publisher_id
+    FROM advertise
+    WHERE status='rejected'
+    GROUP BY publisher_id
+    ORDER BY COUNT(*) DESC
+    LIMIT 1
+) as subquery
+ON u.user_id = subquery.publisher_id
+SET u.last_name = 'Mohammadi';
+
+__________________________________________
+20.
+DELETE FROM advertise
+WHERE status = 'rejected'
+AND category_id = (
+    SELECT cat_id
+    FROM category
+    WHERE name = 'Furniture'
+)
+AND publisher_id = (
+    SELECT user_id
+    FROM user
+    WHERE last_name = 'Mohammadi'
+);
+
+____________________________
+21.
+delete advertise
+where status = 'rejected'
+
+
+_______________________________
+
+22.
+UPDATE advertise
+SET view = view + 100
+WHERE DATE(published_at) = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+AND city IN (
+    SELECT cityName
+    FROM city
+    WHERE province = 'Fars'
+);
+
+
+
+___________________
+23.a
+
+SELECT 
+    a.title AS ad_title,
+    a.ad_id AS ad_id,
+    rc.name AS report_category,
+    COUNT(r.report_id) AS report_count
+FROM 
+    advertise a
+INNER JOIN 
+    report r ON a.ad_id = r.advertise_id
+INNER JOIN 
+    report_category rc ON r.type = rc.cat_id
+GROUP BY 
+    a.title, a.ad_id, rc.name
+ORDER BY 
+    a.ad_id, report_count DESC
+    limit 1;
+
+
+___________________________________________
+
+23.b
+--this query shows the ad with most report count . it also shows all reports with different type related to this advertise with its --count
+-- Find the advertisement with the highest number of reports
+SELECT 
+    a.ad_id,
+    a.title AS ad_title,
+    rc.name AS report_category,
+    COUNT(r.report_id) AS report_count
+FROM 
+    advertise a
+INNER JOIN 
+    report r ON a.ad_id = r.advertise_id
+INNER JOIN 
+    report_category rc ON r.type = rc.cat_id
+WHERE 
+    a.ad_id = (
+        SELECT 
+            advertise_id
+        FROM 
+            report
+        GROUP BY 
+            advertise_id
+        ORDER BY 
+            COUNT(*) DESC
+        LIMIT 1
+    )
+GROUP BY 
+    a.ad_id, a.title, rc.name
+ORDER BY 
+    report_count DESC;
+
+
