@@ -1,0 +1,120 @@
+-- Real Tables For Project
+
+
+create database Project;
+use Project;
+
+
+create table city(
+    cityName varchar(30) unique not null primary key,
+    province varchar(30) not null
+);
+
+CREATE TABLE user (
+    user_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    age TINYINT,
+    phone_number CHAR(11) NOT NULL UNIQUE,
+    city VARCHAR(15) NOT NULL ,
+    email VARCHAR(40) NOT NULL UNIQUE,
+    registration_date DATETIME NOT NULL,
+    first_name VARCHAR(25) NOT NULL ,
+    last_name VARCHAR(25) NOT NULL ,
+    profile BLOB,
+    type TINYINT(1) NOT NULL ,
+    salary float NOT NULL default 0,
+    gender TINYINT(1) NOT NULL,
+    active boolean Not null,
+    FOREIGN KEY (city) REFERENCES city(cityName)
+);
+
+
+
+CREATE TABLE shop (
+    shop_id INT PRIMARY KEY AUTO_INCREMENT,
+    founder_id INT NOT NULL UNIQUE,
+    name VARCHAR(20) NOT NULL,
+    address VARCHAR(60) NOT NULL,
+    city varchar(30) not null,
+    FOREIGN KEY (founder_id) REFERENCES user(user_id),
+    FOREIGN KEY (city) REFERENCES city(cityName)
+);
+
+
+
+
+CREATE TABLE category (
+    cat_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(20) NOT NULL UNIQUE
+);
+
+
+CREATE TABLE report_category (
+    cat_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(20) NOT NULL UNIQUE
+);
+
+
+CREATE TABLE advertise (
+    ad_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    expiration_date DATE NOT NULL,
+    published_at DATETIME NOT NULL,
+    price FLOAT NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    description VARCHAR(200) NOT NULL,
+    view MEDIUMINT DEFAULT 0,
+    phone_number VARCHAR(11) NOT NULL,
+    city VARCHAR(30) NOT NULL,
+    publisher_id INT NOT NULL,
+	status ENUM('rejected', 'pending', 'accepted') NOT NULL,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    type INT NOT NULL,
+    adApprover_id int not null,
+    FOREIGN KEY (publisher_id) REFERENCES user(user_id),
+    FOREIGN KEY (adApprover_id) REFERENCES user(user_id),
+    FOREIGN KEY (city) REFERENCES city(cityName),
+	FOREIGN KEY (type) REFERENCES category(cat_id)
+);
+
+CREATE TABLE image(
+	image_id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    advertise_id INT NOT NULL,
+    FOREIGN KEY (advertise_id) REFERENCES advertise(ad_id)
+);
+
+CREATE TABLE user_veiw (
+    userid INT UNIQUE,
+    adid INT UNIQUE,
+    visit_date DATETIME NOT NULL,
+    FOREIGN KEY (userid) REFERENCES user(user_id),
+    FOREIGN KEY (adid) REFERENCES advertise(ad_id),
+    PRIMARY KEY (userid, adid)
+);
+
+
+CREATE TABLE report (
+    report_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    note VARCHAR(150),
+    status ENUM('rejected', 'pending', 'accepted') NOT NULL,
+    writer_id INT NOT NULL,
+    Moderator_id INT NOT NULL,
+    advertise_id INT NOT NULL,
+    type INT NOT NULL,
+    FOREIGN KEY (writer_id) REFERENCES user(user_id),
+    FOREIGN KEY (Moderator_id) REFERENCES user(user_id),
+    FOREIGN KEY (advertise_id) REFERENCES advertise(ad_id),
+    FOREIGN KEY (type) REFERENCES report_category(cat_id)
+);
+
+CREATE TABLE meta (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    advertise_id INT NOT NULL,
+    meta_key VARCHAR(20) NOT NULL,
+    value_key VARCHAR(60) NOT NULL,
+    FOREIGN KEY (advertise_id) REFERENCES advertise(ad_id)
+);
+
+
+
+
+
+
