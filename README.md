@@ -12,4 +12,7 @@ if you use windows (dont use it) you can activate it by this cammand:<br>
 `.\activate`<br>
 then install requirements like this : <br>
 `pip install -r requirements.text `<br>
-then ...
+to connect to your mysql create a file and name it .env 
+inside it store your mysql password as this : <br>
+`mysql_password="your_pass"`
+then continue ...
