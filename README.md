@@ -10,6 +10,6 @@ if you use windows (dont use it) you can activate it by this cammand:<br>
 `cd env`<br>
 `cd scripts`<br>
 `.\activate`<br>
-`then install fastapi like this :` <br>
-pip install fastapi`<br>
+then install requirements like this : <br>
+`pip install -r requirements.text `<br>
 then ...
