@@ -13,8 +13,10 @@ mydb = mysql.connector.connect(
     host = "localhost",
     user = "root",
     password = mysql_password
+    # create a database in your local system and create the table 
+    # add this field :
+    #database = "your database name"
 )
 
-cursor = mydb.cursor() # create an instance of cursor class to execute mysql commands
-cursor.execute("drop database project");
+print("succesfully conected")
 
