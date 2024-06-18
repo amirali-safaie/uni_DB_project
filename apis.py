@@ -1,20 +1,25 @@
 import mysql.connector
 import os
 from dotenv import load_dotenv
+#...import fastapi packages.......
+from fastapi import FastAPI,Query,Path, Body, Header 
+from pydantic import BaseModel, Field
+from typing import Optional ,Union,Tuple ,Annotated
+
+
 
 
 #import pass from env variable
 load_dotenv()
 mysql_password = os.getenv('mysql_password')
-print(mysql_password)
 
 # Creating connection object
 mydb = mysql.connector.connect(
     host = "localhost",
-    user = "root",
-    password = mysql_password
+    user = "root", #enter your mysql username
+    password = mysql_password 
 )
 
 cursor = mydb.cursor() # create an instance of cursor class to execute mysql commands
-cursor.execute("drop database project");
+# cursor.execute("drop database project") #example of how run sql command on file 
 
