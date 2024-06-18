@@ -1,27 +1,38 @@
 import mysql.connector
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI
+#...import fastapi packages.......
+from fastapi import FastAPI,Query,Path, Body, Header 
+from pydantic import BaseModel, Field
+from typing import Optional ,Union,Tuple ,Annotated
 
-app = FastAPI()
+
+
 
 #import pass from env variable
 load_dotenv()
 mysql_password = os.getenv('mysql_password')
-print(mysql_password)
 
 # Creating connection object
 mydb = mysql.connector.connect(
     host = "localhost",
-    user = "root",
-    password = mysql_password,
-    database = "project"
+    user = "root", #enter your mysql username
+    password = mysql_password 
 )
+cursor = mydb.cursor() # create an instance of cursor class to execute mysql commands
 
-cursor = mydb.cursor()
+app = FastAPI() 
 
-@app.get("/rejectAds")
-async def rejected(advertiseId:int, adminId:int):
-    cursor.excute("update advertise set status='rejected', adApprover_id=adminId where ad_id=advertiseId")
-    cursor.commit()
+class  Advertise(BaseModel):
+   id: int
+   name :str = Field(None, title="name of student", max_length=10)
+   marks: list[int] = []
+   percent_marks: float
+
+
+#amiralis apis.....................................................................
+
+#amiralis apis.....................................................................
+
+# cursor.execute("drop database project") #example of how run sql command on file 
 
