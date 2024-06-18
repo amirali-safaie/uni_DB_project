@@ -19,7 +19,20 @@ mydb = mysql.connector.connect(
     user = "root", #enter your mysql username
     password = mysql_password 
 )
-
 cursor = mydb.cursor() # create an instance of cursor class to execute mysql commands
+
+app = FastAPI() 
+
+class  Advertise(BaseModel):
+   id: int
+   name :str = Field(None, title="name of student", max_length=10)
+   marks: list[int] = []
+   percent_marks: float
+
+
+#amiralis apis.....................................................................
+
+#amiralis apis.....................................................................
+
 # cursor.execute("drop database project") #example of how run sql command on file 
 
