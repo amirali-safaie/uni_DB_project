@@ -13,21 +13,20 @@ from typing import Optional ,Union,Tuple ,Annotated
 load_dotenv()
 mysql_password = os.getenv('mysql_password')
 
+app = FastAPI() 
+
 # Creating connection object
 mydb = mysql.connector.connect(
     host = "localhost",
     user = "root", #enter your mysql username
-    password = mysql_password 
+    password = mysql_password ,
+    database = "Project"
 )
+
 cursor = mydb.cursor() # create an instance of cursor class to execute mysql commands
 
-app = FastAPI() 
 
-class  Advertise(BaseModel):
-   id: int
-   name :str = Field(None, title="name of student", max_length=10)
-   marks: list[int] = []
-   percent_marks: float
+
 
 
 #amiralis apis.....................................................................
