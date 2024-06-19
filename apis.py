@@ -14,18 +14,25 @@ load_dotenv()
 mysql_password = os.getenv('mysql_password')
 
 app = FastAPI() 
-
 # Creating connection object
 mydb = mysql.connector.connect(
     host = "localhost",
     user = "root", #enter your mysql username
     password = mysql_password ,
-    database = "Project"
+    database = "project"
 )
 
 cursor = mydb.cursor() # create an instance of cursor class to execute mysql commands
 
 
+
+#Hossein apis.......................................................................
+@app.get("/rejectAd")  #number 14
+async def reject(advertiseId:int, adminId:int):
+    cursor.execute(f"update advertise set status='rejected', adApprover_id={adminId} where ad_id={advertiseId}")
+    mydb.commit()
+
+#Hossein apis........................................................................
 
 
 
