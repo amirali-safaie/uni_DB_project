@@ -71,6 +71,19 @@ async def get():
           
      return {"list of advertises" : listOfAdvertis}
 
+
+@app.get("/filterAdvertise")  #number 8
+async def filter(typee:str, low_price:int|None=0, high_price:int|None=200000000000):
+    cursor.execute(f"select * from advertise where price > {low_price} and price < {high_price} and  type = (select cat_id from category where name='{typee}');")
+    records = cursor.fetchall()
+    listOfAdvertises = []
+    for x in records:
+        ad = advertiseOut(ad_id=x[0], published_at=x[2], price=x[3], title=x[4], desc=x[5], phone_number=x[7], city=x[8], publisher_id=x[9], cat_id=x[12])
+        listOfAdvertises.append(ad)
+
+    return {"list of advertises" : listOfAdvertises}    
+
+
 #Hossein apis........................................................................
 
 
