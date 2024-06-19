@@ -85,6 +85,19 @@ async def visit_advertise(advertise_id:int):
     return response
 
 
+@app.get("/{user_id}/advertises")
+async def published_advertise_user(user_id: int):
+
+
+    cursor.execute(f"""
+    select title,phone_number,city,status,view
+    from advertise 
+    where advertise.publisher_id = {user_id}""")
+
+    result = cursor.fetchall()
+    nl = '\n'
+    return f'list of advertises: \n {result}'
+
 
 #amiralis apis.....................................................................
 
