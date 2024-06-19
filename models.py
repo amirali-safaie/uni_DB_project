@@ -1,8 +1,8 @@
 from pydantic import BaseModel, Field
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, List
 
-class Advertisement(BaseModel):
+class Advertise(BaseModel):
     price: Optional[float] = Field(None, title="Price associated with the advertisement")
     description: Optional[str] = Field(None, title="Description of the advertisement", max_length=200)
     title: str = Field(..., title="Title of the advertisement", max_length=100)
