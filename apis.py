@@ -36,7 +36,7 @@ cursor = mydb.cursor() # create an instance of cursor class to execute mysql com
 #amiralis apis.....................................................................
 
 @app.post("/{publisher_id}/advertise")
-async def student_data(a1: Advertise,publisher_id: int):
+async def publish_advertise(a1: Advertise,publisher_id: int):
     today = datetime.now()
     two_weeks_later = today + timedelta(weeks=2)
     expiration_date = two_weeks_later.strftime('%Y-%m-%d %H:%M:%S')
@@ -52,6 +52,37 @@ async def student_data(a1: Advertise,publisher_id: int):
 
     return f'advertise with {a1.title} is registered'
 
+
+@app.patch("/advertise/{advertise_id}",response_model=dict)
+async def visit_advertise(advertise_id:int):
+
+    cursor.execute(f"""
+    select published_at,price,title,phone_number,city,
+    (select c.name from category as c where c.cat_id = a.type)
+    from advertise as a 
+    where a.ad_id = {advertise_id} and a.status = 'accepted' """)
+
+    result = cursor.fetchone()
+
+    cursor.execute(f"""
+    update advertise 
+    set view = view + 1
+    where advertise.ad_id = {advertise_id}
+    """)
+
+    mydb.commit()
+
+
+    response = {
+        "title: ":result[2],
+        "published_at: ":str(result[0]),
+        "price: ":result[1],
+        "category: ":result[5],
+        "comminucate_way: ":result[3],
+        "city: ":result[4],
+    }
+
+    return response
 
 
 
