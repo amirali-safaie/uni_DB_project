@@ -1,4 +1,5 @@
 env/
 .env.txt
+.env
 main.py
 .idea/
