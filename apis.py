@@ -37,7 +37,21 @@ cursor = mydb.cursor() # create an instance of cursor class to execute mysql com
 
 @app.post("/{publisher_id}/advertise")
 async def student_data(a1: Advertise,publisher_id: int):
-   return a1
+    today = datetime.now()
+    two_weeks_later = today + timedelta(weeks=2)
+    expiration_date = two_weeks_later.strftime('%Y-%m-%d %H:%M:%S')
+
+
+    cursor.execute(f"""
+    INSERT INTO advertise (expiration_date, published_at, price, title, 
+    description, status, phone_number, city, publisher_id,type , deleted)
+    VALUES ('{expiration_date}', '{today}', {a1.price}, '{a1.title}', '{a1.description}', 'pending', '{a1.phone_number}',
+    '{a1.city}',{publisher_id},(SELECT cat_id FROM category WHERE name = '{a1.type_name}'), FALSE);""")
+
+    mydb.commit()
+
+    return f'advertise with {a1.title} is registered'
+
 
 
 
