@@ -43,13 +43,13 @@ async def addShop(shop : Shop):
             isFound = True
             break
     if(not isFound): # incorrect city in input
-            raise HTTPException(status_code=400, detail="the city is incorrect") 
+        raise HTTPException(status_code=400, detail="the city is incorrect") 
     
     cursor.execute("select founder_id from shop")
     records = cursor.fetchall()
     for x in records:
          if(x[0] == shop.founderId):   #find the user that found the shop
-              raise HTTPException(status_code=400, detail="you have already shop")    
+            raise HTTPException(status_code=400, detail="you have already shop")    
 
     cursor.execute("""
     INSERT INTO shop (founder_id, name, address, city) 
