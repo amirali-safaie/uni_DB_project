@@ -98,6 +98,19 @@ async def published_advertise_user(user_id: int):
     nl = '\n'
     return f'list of advertises: \n {result}'
 
+@app.patch("/deactivate/{user_id}")
+async def deactivate_user(user_id: int):
+
+
+    cursor.execute(f"""
+    update user
+    set active = 0
+    where user_id = {user_id}""")
+
+    mydb.commit()
+
+    return f'user with {user_id} deactivated'
+
 
 #amiralis apis.....................................................................
 
