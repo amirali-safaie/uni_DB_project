@@ -28,10 +28,10 @@ cursor = mydb.cursor() # create an instance of cursor class to execute mysql com
 
 #Hossein apis.......................................................................
 @app.get("/rejectAd")  #number 14
-async def reject(advertiseId:int, adminId:int):
-    cursor.execute(f"update advertise set status='rejected', adApprover_id={adminId} where ad_id={advertiseId}")
+async def reject(advertiseId:int):
+    cursor.execute(f"update advertise set deleted=TRUE where ad_id={advertiseId}")
     mydb.commit()
-    return {"message": f"the advertise {advertiseId} rejected"}
+    return {"message": f"the advertise {advertiseId} deleted"}
 
 
 @app.post("/addShop") #number 11
@@ -59,6 +59,7 @@ async def addShop(shop : Shop):
 
     mydb.commit()
     return {"message": "shop added succesfully"}
+     
 
 
 #Hossein apis........................................................................
