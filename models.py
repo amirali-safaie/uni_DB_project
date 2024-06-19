@@ -30,18 +30,7 @@ class advertiseOut(BaseModel):
     phone_number: str
     city:str
     publisher_id : int
-    type: str
-    
-    def __init__(self, ad_id, published_at, price, title, desc, phone_number, city, publisher_id, type):
-        self.ad_id = ad_id
-        self.published_at = published_at
-        self.price = price
-        self.title = title
-        self.desc = desc
-        self.phone_number = phone_number
-        self.city = city
-        self.publisher_id = publisher_id
-        self.type = type
+    cat_id: int
 
 
 

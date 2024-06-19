@@ -5,8 +5,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI,Query,Path, Body, Header, HTTPException 
 from pydantic import BaseModel, Field
 from typing import Optional ,Union,Tuple ,Annotated
-from models import Shop
-
+from models import Shop, advertiseOut
 
 
 #import pass from env variable
@@ -61,6 +60,16 @@ async def addShop(shop : Shop):
     return {"message": "shop added succesfully"}
      
 
+@app.get("/getMostReceantlyAds")   #number 5
+async def get():
+     cursor.execute("select * from advertise where deleted = FALSE   and status='accepted' order by published_at desc limit 5")
+     records = cursor.fetchall()
+     listOfAdvertis = []
+     for x in records:
+          ad = advertiseOut(ad_id=x[0], published_at=x[2], price=x[3], title=x[4], desc=x[5], phone_number=x[7], city=x[8], publisher_id=x[9], cat_id=x[12])
+          listOfAdvertis.append(ad)
+          
+     return {"list of advertises" : listOfAdvertis}
 
 #Hossein apis........................................................................
 
