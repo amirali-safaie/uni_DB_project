@@ -31,6 +31,8 @@ cursor = mydb.cursor() # create an instance of cursor class to execute mysql com
 async def reject(advertiseId:int, adminId:int):
     cursor.execute(f"update advertise set status='rejected', adApprover_id={adminId} where ad_id={advertiseId}")
     mydb.commit()
+    return {"message": f"the advertise {advertiseId} rejected"}
+
 
 #Hossein apis........................................................................
 

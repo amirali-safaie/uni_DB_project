@@ -20,3 +20,11 @@ class Advertisement(BaseModel):
     adApprover_id: Optional[int] = Field(None, title="ID of the approver for the advertisement")
 
 # You may need to adjust types and constraints as per your actual database schema.
+
+
+class Shop(BaseModel):
+    founderId: int
+    name: str
+    address: str
+    city: str
+
