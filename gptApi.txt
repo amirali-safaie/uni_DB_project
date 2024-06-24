@@ -1,0 +1,154 @@
+from fastapi import FastAPI, HTTPException, Depends
+from pydantic import BaseModel, Field
+from typing import List, Optional
+import mysql.connector
+import aioredis
+import random
+import string
+
+app = FastAPI()
+
+# Redis setup
+redis = aioredis.from_url("redis://localhost")
+
+# Database connection
+def get_db_connection():
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="yourusername",
+        password="yourpassword",
+        database="Project"
+    )
+    return conn
+
+# Pydantic models
+class OTPRequest(BaseModel):
+    phone_number: str = Field(..., max_length=11)
+
+class OTPVerify(BaseModel):
+    phone_number: str = Field(..., max_length=11)
+    otp_code: str = Field(..., max_length=6)
+
+class RegisterUser(BaseModel):
+    first_name: str
+    last_name: str
+    email: str
+    phone_number: str
+    password: str  # In a real application, you would hash this
+    city: str
+
+class Advertise(BaseModel):
+    price: float
+    description: str
+    title: str
+    phone_number: str
+    city: str
+    type_name: str
+
+class UpdateProfile(BaseModel):
+    first_name: Optional[str]
+    last_name: Optional[str]
+    email: Optional[str]
+    phone_number: Optional[str]
+    city: Optional[str]
+    profile_picture: Optional[str]
+
+class AdApproval(BaseModel):
+    ad_id: int
+    status: str
+
+# Helper functions
+def generate_otp():
+    return ''.join(random.choices(string.digits, k=6))
+
+# API Endpoints
+@app.post("/login-with-otp")
+async def login_with_otp(request: OTPRequest):
+    otp = generate_otp()
+    await redis.set(request.phone_number, otp, ex=300)  # OTP expires in 5 minutes
+    return {"otp": otp}
+
+@app.post("/verify-otp")
+async def verify_otp(request: OTPVerify):
+    otp = await redis.get(request.phone_number)
+    if otp is None or otp.decode() != request.otp_code:
+        raise HTTPException(status_code=400, detail="Invalid OTP")
+    return {"message": "OTP verified successfully"}
+
+@app.post("/register")
+def register_user(user: RegisterUser):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "INSERT INTO user (first_name, last_name, email, phone_number, city, registration_date, type, active) "
+            "VALUES (%s, %s, %s, %s, %s, NOW(), 1, TRUE)",
+            (user.first_name, user.last_name, user.email, user.phone_number, user.city)
+        )
+        conn.commit()
+    except mysql.connector.IntegrityError:
+        raise HTTPException(status_code=400, detail="User with this email or phone number already exists")
+    finally:
+        cursor.close()
+        conn.close()
+    return {"message": "User registered successfully"}
+
+@app.post("/post-ad")
+def post_ad(ad: Advertise):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "INSERT INTO advertise (title, description, price, phone_number, city, published_at, type, status, publisher_id) "
+            "VALUES (%s, %s, %s, %s, %s, NOW(), "
+            "(SELECT cat_id FROM category WHERE name=%s), 'pending', %s)",
+            (ad.title, ad.description, ad.price, ad.phone_number, ad.city, ad.type_name, 1)  # Assuming publisher_id=1 for now
+        )
+        conn.commit()
+    except mysql.connector.Error as err:
+        raise HTTPException(status_code=400, detail=f"Error: {err}")
+    finally:
+        cursor.close()
+        conn.close()
+    return {"message": "Ad posted successfully"}
+
+@app.post("/approve-ad")
+def approve_ad(ad: AdApproval):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "UPDATE advertise SET status = %s WHERE ad_id = %s",
+            (ad.status, ad.ad_id)
+        )
+        conn.commit()
+    except mysql.connector.Error as err:
+        raise HTTPException(status_code=400, detail=f"Error: {err}")
+    finally:
+        cursor.close()
+        conn.close()
+    return {"message": f"Ad {ad.status}"}
+
+@app.put("/update-profile")
+def update_profile(profile: UpdateProfile):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    update_fields = ", ".join([f"{field} = %s" for field in profile.dict() if profile.dict()[field] is not None])
+    update_values = [profile.dict()[field] for field in profile.dict() if profile.dict()[field] is not None]
+    try:
+        cursor.execute(
+            f"UPDATE user SET {update_fields} WHERE user_id = %s",
+            (*update_values, 1)  # Assuming user_id=1 for now
+        )
+        conn.commit()
+    except mysql.connector.Error as err:
+        raise HTTPException(status_code=400, detail=f"Error: {err}")
+    finally:
+        cursor.close()
+        conn.close()
+    return {"message": "Profile updated successfully"}
+
+# Run the app
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
