@@ -41,3 +41,12 @@ class Shop(BaseModel):
     address: str
     city: str
 
+class userIn(BaseModel):
+    age:int
+    phone_number:str
+    city:str
+    email:str
+    fname:str
+    lname:str
+    gender:int    
+
