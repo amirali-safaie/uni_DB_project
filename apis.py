@@ -1,11 +1,12 @@
 import mysql.connector
 import os
+import smtplib, ssl, random
 from dotenv import load_dotenv
 #...import fastapi packages.......
 from fastapi import FastAPI,Query,Path, Body, Header, HTTPException 
 from pydantic import BaseModel, Field
 from typing import Optional ,Union,Tuple ,Annotated
-from models import Shop, advertiseOut
+from models import Shop, advertiseOut, userIn
 
 
 #import pass from env variable
@@ -83,7 +84,19 @@ async def filter(typee:str, low_price:int|None=0, high_price:int|None=2000000000
 
     return {"list of advertises" : listOfAdvertises}    
 
-
+@app.get("/sendEmail")
+async def send(email:str):
+    port = 465  # For SSL
+    smtp_server = "smtp.gmail.com"
+    sender_email = "hosseinabedinipoco@gmail.com"  # Enter your address
+    receiver_email = email  # Enter receiver address
+    password = "ahwkbhvcjkjlscbd"
+    num = random.randint(1000, 9999)
+    message = str(num)
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, message)
 #Hossein apis........................................................................
 
 
