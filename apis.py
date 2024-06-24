@@ -1,6 +1,6 @@
 import mysql.connector
 import os
-import smtplib, ssl, random
+import smtplib, ssl, random, datetime
 from dotenv import load_dotenv
 #...import fastapi packages.......
 from fastapi import FastAPI,Query,Path, Body, Header, HTTPException 
@@ -84,6 +84,8 @@ async def filter(typee:str, low_price:int|None=0, high_price:int|None=2000000000
 
     return {"list of advertises" : listOfAdvertises}    
 
+
+passs = {}
 @app.get("/sendEmail")
 async def send(email:str):
     port = 465  # For SSL
@@ -93,10 +95,42 @@ async def send(email:str):
     password = "ahwkbhvcjkjlscbd"
     num = random.randint(1000, 9999)
     message = str(num)
+    passs[email] = message
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
         server.login(sender_email, password)
         server.sendmail(sender_email, receiver_email, message)
+
+
+@app.get("/login")
+async def login(password:str, email:str):
+    cursor.execute(f"select * from user where email='{email}'")
+    record = cursor.fetchall()
+    if(len(record) == 0):
+        raise HTTPException(status_code=400, detail="there is not this email")
+    if(password != passs[email]):
+        raise HTTPException(status_code=400, detail="incorect password")
+    passs.pop(email)
+    return {"message" : "succesful"}
+
+@app.post("/signup")
+async def signup(user:userIn, password:str):
+    cursor.execute(f"select * from user where email='{user.email}'")
+    record = cursor.fetchall()
+    if(len(record) != 0):
+        raise HTTPException(status_code=400, detail="this email is already exists")
+    cursor.execute(f"select * from user where phone_number='{user.phone_number}'")
+    record = cursor.fetchall()
+    if(len(record) != 0):
+        raise HTTPException(status_code=400, detail="this phone number is already exists")
+    if(password != passs[user.email]):
+        raise HTTPException(status_code=400, detail="incorect password")
+    date = datetime.datetime.now()
+    cursor.execute(f"INSERT INTO user (phone_number, city, email, registration_date, first_name, last_name, type, salary, gender, active) VALUES ('{user.phone_number}', '{user.city}', '{user.email}', '{date}', '{user.fname}', '{user.lname}', 1, 0, {user.gender}, TRUE)")
+    mydb.commit()
+    passs.pop(user.email)
+    return {"message" : "the user added succesfully"}
+
 #Hossein apis........................................................................
 
 
