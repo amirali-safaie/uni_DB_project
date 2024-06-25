@@ -7,7 +7,7 @@ from fastapi import FastAPI,Query,Path, Body, Header
 from pydantic import BaseModel, Field
 from typing import Optional ,Union,Tuple ,Annotated
 #...import fastapi packages.......
-from models import Advertise
+from models import Advertise,report
 
 
 
@@ -100,6 +100,19 @@ async def published_advertise_user(user_id: int):
 
 @app.patch("/deactivate/{user_id}")
 async def deactivate_user(user_id: int):
+
+
+    cursor.execute(f"""
+    update user
+    set active = 0
+    where user_id = {user_id}""")
+
+    mydb.commit()
+
+    return f'user with {user_id} deactivated'
+
+@app.post("/{user_id}/advertise/{advertise_id}")
+async def deactivate_user(user_id: int,advertise_id:int,r1:Report):
 
 
     cursor.execute(f"""

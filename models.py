@@ -10,6 +10,11 @@ class Advertise(BaseModel):
     city: str = Field(..., title="name of city related to the advertisement")
     type_name: str = Field(..., title="Type of the advertisement")
 
+
+class Report(BaseModel):
+    note: str = Field(..., title="note of report")
+    type_name: str = Field(..., title="category of report")
+
 # You may need to adjust types and constraints as per your actual database schema.
 
 

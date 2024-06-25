@@ -96,7 +96,7 @@ CREATE TABLE report (
     note VARCHAR(150),
     status ENUM('rejected', 'pending', 'accepted') NOT NULL,
     writer_id INT NOT NULL,
-    Moderator_id INT NOT NULL,
+    Moderator_id INT NOT NULL,   
     advertise_id INT NOT NULL,
     type INT NOT NULL,
     FOREIGN KEY (writer_id) REFERENCES user(user_id),
