@@ -7,7 +7,7 @@ from fastapi import FastAPI,Query,Path, Body, Header
 from pydantic import BaseModel, Field
 from typing import Optional ,Union,Tuple ,Annotated
 #...import fastapi packages.......
-from models import Advertise,report
+from models import Advertise,Report
 
 
 
@@ -116,13 +116,14 @@ async def deactivate_user(user_id: int,advertise_id:int,r1:Report):
 
 
     cursor.execute(f"""
-    update user
-    set active = 0
-    where user_id = {user_id}""")
+    INSERT INTO report (note, status, writer_id, advertise_id, type) VALUES 
+    ('{r1.note}', 'pending', {user_id}, {advertise_id}, 
+    (SELECT cat_id FROM report_category WHERE name = '{r1.type_name}'));
+    """)
 
     mydb.commit()
 
-    return f'user with {user_id} deactivated'
+    return f'advertise reported by {user_id}'
 
 
 #amiralis apis.....................................................................
