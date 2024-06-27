@@ -7,13 +7,14 @@ from fastapi import FastAPI,Query,Path, Body, Header, HTTPException
 from pydantic import BaseModel, Field
 from typing import Optional ,Union,Tuple ,Annotated
 from models import Shop, advertiseOut, userIn
-
+from fastapi.middleware.cors import CORSMiddleware
 
 #import pass from env variable
 load_dotenv()
 mysql_password = os.getenv('mysql_password')
 
 app = FastAPI() 
+
 # Creating connection object
 mydb = mysql.connector.connect(
     host = "localhost",
@@ -108,8 +109,11 @@ async def login(password:str, email:str):
     record = cursor.fetchall()
     if(len(record) == 0):
         raise HTTPException(status_code=400, detail="there is not this email")
-    if(password != passs[email]):
-        raise HTTPException(status_code=400, detail="incorect password")
+    try:
+        if(password != passs[email]):
+            raise HTTPException(status_code=400, detail="incorect password")
+    except:
+        raise HTTPException(status_code=400, detail="email was not send")    
     passs.pop(email)
     return {"message" : "succesful"}
 
@@ -123,8 +127,12 @@ async def signup(user:userIn, password:str):
     record = cursor.fetchall()
     if(len(record) != 0):
         raise HTTPException(status_code=400, detail="this phone number is already exists")
-    if(password != passs[user.email]):
-        raise HTTPException(status_code=400, detail="incorect password")
+    try:
+        if(password != passs[user.email]):
+            raise HTTPException(status_code=400, detail="incorect password")
+    except:
+        raise HTTPException(status_code=400, detail="the email was not send")
+    
     date = datetime.datetime.now()
     cursor.execute(f"INSERT INTO user (phone_number, city, email, registration_date, first_name, last_name, type, salary, gender, active) VALUES ('{user.phone_number}', '{user.city}', '{user.email}', '{date}', '{user.fname}', '{user.lname}', 1, 0, {user.gender}, TRUE)")
     mydb.commit()
