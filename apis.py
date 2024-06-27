@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 #...import fastapi packages.......
 from fastapi import FastAPI,Query,Path, Body
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse,HTMLResponse
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 from typing import Optional ,Union,Tuple ,Annotated
 #...import fastapi packages.......
@@ -19,6 +20,7 @@ load_dotenv()
 mysql_password = os.getenv('mysql_password')
 
 app = FastAPI() 
+templates = Jinja2Templates(directory="templates")
 
 # Creating connection object
 mydb = mysql.connector.connect(
@@ -83,7 +85,7 @@ async def visit_advertise(advertise_id:int):
         "city": result[4],
     }
 
-    return JSONResponse(content=response)
+    return templates.TemplateResponse("advertise_detail.html", response)
 
 
 @app.get("/{user_id}/advertises")
