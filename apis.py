@@ -3,7 +3,8 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 #...import fastapi packages.......
-from fastapi import FastAPI,Query,Path, Body, Header 
+from fastapi import FastAPI,Query,Path, Body
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import Optional ,Union,Tuple ,Annotated
 #...import fastapi packages.......
@@ -63,7 +64,7 @@ async def visit_advertise(advertise_id:int):
     where a.ad_id = {advertise_id} and a.status = 'accepted' """)
 
     result = cursor.fetchone()
-
+    print(result)
     cursor.execute(f"""
     update advertise 
     set view = view + 1
@@ -74,15 +75,15 @@ async def visit_advertise(advertise_id:int):
 
 
     response = {
-        "title: ":result[2],
-        "published_at: ":str(result[0]),
-        "price: ":result[1],
-        "category: ":result[5],
-        "comminucate_way: ":result[3],
-        "city: ":result[4],
+        "title": result[2],
+        "published_at": str(result[0]),
+        "price": result[1],
+        "category": result[5],
+        "comminucate_way": result[3],
+        "city": result[4],
     }
 
-    return response
+    return JSONResponse(content=response)
 
 
 @app.get("/{user_id}/advertises")
