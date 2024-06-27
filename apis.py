@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 #...import fastapi packages.......
-from fastapi import FastAPI,Query,Path, Body
+from fastapi import FastAPI,Query,Path, Body,Request
 from fastapi.responses import JSONResponse,HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
@@ -56,8 +56,8 @@ async def publish_advertise(a1: Advertise,publisher_id: int):
     return f'advertise with {a1.title} is registered'
 
 
-@app.patch("/advertise/{advertise_id}",response_model=dict)
-async def visit_advertise(advertise_id:int):
+@app.get("/advertise/{advertise_id}",response_class=HTMLResponse)
+async def visit_advertise(advertise_id:int,request: Request):
 
     cursor.execute(f"""
     select published_at,price,title,phone_number,city,
@@ -85,7 +85,7 @@ async def visit_advertise(advertise_id:int):
         "city": result[4],
     }
 
-    return templates.TemplateResponse("advertise_detail.html", response)
+    return templates.TemplateResponse("advertise_detail.html", {"request": request, "response":response})
 
 
 @app.get("/{user_id}/advertises")
