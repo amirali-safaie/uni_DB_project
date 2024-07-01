@@ -3,11 +3,13 @@ import os
 import smtplib, ssl, random, datetime
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
+from fastapi.responses import JSONResponse,HTMLResponse
+from fastapi.templating import Jinja2Templates
 #...import fastapi packages.......
-from fastapi import FastAPI,Query,Path, Body,Header, HTTPException
+from fastapi import FastAPI,Query,Path, Body,Header, HTTPException, Request
 from pydantic import BaseModel, Field
 from typing import Optional ,Union,Tuple ,Annotated
-#...import fastapi packages.......
+#...import models.............
 from models import Advertise,Report,Shop, advertiseOut, userIn
 
 #import pass from env variable
@@ -22,7 +24,7 @@ mydb = mysql.connector.connect(
     host = "localhost",
     user = "root", #enter your mysql username
     password = mysql_password ,
-    database = "project"
+    database = "Project"
 )
 
 cursor = mydb.cursor() # create an instance of cursor class to execute mysql commands
