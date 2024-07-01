@@ -11,11 +11,12 @@ from pydantic import BaseModel, Field
 from typing import Optional ,Union,Tuple ,Annotated
 #...import models.............
 from models import Advertise,Report,Shop, advertiseOut, userIn
+import redis 
 
 #import pass from env variable
 load_dotenv()
 mysql_password = os.getenv('mysql_password')
-
+r = redis.Redis("localhost")
 app = FastAPI() 
 templates = Jinja2Templates(directory="templates")
 
@@ -90,7 +91,6 @@ async def filter(typee:str, low_price:int|None=0, high_price:int|None=2000000000
     return {"list of advertises" : listOfAdvertises}    
 
 
-passs = {}
 @app.get("/sendEmail")
 async def send(email:str):
     port = 465  # For SSL
@@ -100,7 +100,7 @@ async def send(email:str):
     password = "ahwkbhvcjkjlscbd"
     num = random.randint(1000, 9999)
     message = str(num)
-    passs[email] = message
+    r.setex(email, message, 120)
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
         server.login(sender_email, password)
@@ -108,21 +108,17 @@ async def send(email:str):
 
 
 @app.get("/login")
-async def login(password:str, email:str):
+async def login(password:int, email:str):
     cursor.execute(f"select * from user where email='{email}'")
     record = cursor.fetchall()
     if(len(record) == 0):
         raise HTTPException(status_code=400, detail="there is not this email")
-    try:
-        if(password != passs[email]):
-            raise HTTPException(status_code=400, detail="incorect password")
-    except:
-        raise HTTPException(status_code=400, detail="email was not send")    
-    passs.pop(email)
+    if(password != int(r.get(email))):
+        raise HTTPException(status_code=400, detail="incorect password")   
     return {"message" : "succesful"}
 
 @app.post("/signup")
-async def signup(user:userIn, password:str):
+async def signup(user:userIn, password:int):
     cursor.execute(f"select * from user where email='{user.email}'")
     record = cursor.fetchall()
     if(len(record) != 0):
@@ -131,16 +127,13 @@ async def signup(user:userIn, password:str):
     record = cursor.fetchall()
     if(len(record) != 0):
         raise HTTPException(status_code=400, detail="this phone number is already exists")
-    try:
-        if(password != passs[user.email]):
-            raise HTTPException(status_code=400, detail="incorect password")
-    except:
-        raise HTTPException(status_code=400, detail="the email was not send")
+    if(password != int(r.get(user.email))):
+        raise HTTPException(status_code=400, detail="incorect password")
     
-    date = datetime.datetime.now()
+    date = datetime.now()
     cursor.execute(f"INSERT INTO user (phone_number, city, email, registration_date, first_name, last_name, type, salary, gender, active) VALUES ('{user.phone_number}', '{user.city}', '{user.email}', '{date}', '{user.fname}', '{user.lname}', 1, 0, {user.gender}, TRUE)")
     mydb.commit()
-    passs.pop(user.email)
+
     return {"message" : "the user added succesfully"}
 
 #Hossein apis........................................................................
