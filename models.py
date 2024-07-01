@@ -18,3 +18,31 @@ class Report(BaseModel):
 # You may need to adjust types and constraints as per your actual database schema.
 
 
+class advertiseOut(BaseModel):
+    ad_id:int
+    published_at: datetime
+    price: float
+    title: str
+    desc: Optional[str]
+    phone_number: str
+    city:str
+    publisher_id : int
+    cat_id: int
+
+
+
+
+class Shop(BaseModel):
+    founderId: int
+    name: str
+    address: str
+    city: str
+
+class userIn(BaseModel):
+    phone_number:str
+    city:str
+    email:str
+    fname:str
+    lname:str
+    gender:int    
+
