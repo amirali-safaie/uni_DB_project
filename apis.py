@@ -4,34 +4,73 @@ import mysql.connector
 import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
-# Importing FastAPI packages
 from fastapi import FastAPI, Form, Query, Path, Body, Header, HTTPException, UploadFile, File
-from pydantic import BaseModel, Field, constr
-from typing import Optional, Union, Tuple, Annotated
-from models import  AdReview, UserProfile,UserProfileUpdate
 from fastapi.responses import StreamingResponse
-
-
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from fastapi.requests import Request
+from pydantic import BaseModel, Field, constr, EmailStr
+from typing import Optional, Union, Tuple
+from models import AdReview, UserProfile, UserProfileUpdate
 
 # Import pass from env variable
 load_dotenv()
 mysql_password = os.getenv('mysql_password')
 
-app = FastAPI() 
+app = FastAPI()
+
+# Mount the static files directory
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Load templates
+templates = Jinja2Templates(directory="templates")
 
 # Creating connection object
 mydb = mysql.connector.connect(
-    host = "localhost",
-    user = "root",  # enter your MySQL username
-    password = mysql_password,
-    database = "myproject"
+    host="localhost",
+    user="root",  # enter your MySQL username
+    password=mysql_password,
+    database="myproject"
 )
 
 cursor = mydb.cursor()  # create an instance of cursor class to execute MySQL commands
 
+@app.get("/")
+async def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/profile")
+async def profile_page(request: Request):
+    return templates.TemplateResponse("profile.html", {"request": request})
+
+@app.get("/review")
+async def review_page(request: Request):
+    return templates.TemplateResponse("review.html", {"request": request})
+
+@app.get("/reports")
+async def reports_page(request: Request):
+    return templates.TemplateResponse("reports.html", {"request": request})
+
+@app.get("/user_login")
+async def user_login_page(request: Request):
+    return templates.TemplateResponse("user_login.html", {"request": request})
+
+@app.get("/user_actions/{user_id}")
+async def user_actions_page(request: Request, user_id: int):
+    return templates.TemplateResponse("user_actions.html", {"request": request, "user_id": user_id})
+@app.get("/admin")
+async def admin_page(request: Request):
+    return templates.TemplateResponse("admin.html", {"request": request})
+
+@app.get("/review")
+async def review_page(request: Request):
+    return templates.TemplateResponse("review.html", {"request": request})
+
+@app.get("/reports")
+async def reports_page(request: Request):
+    return templates.TemplateResponse("reports.html", {"request": request})
 
 
-# API 4
 @app.patch("/support/advertise/{advertise_id}/status")
 async def review_advertise(advertise_id: int, review: AdReview):
     allowed_statuses = {"rejected", "accepted"}
@@ -52,8 +91,6 @@ async def review_advertise(advertise_id: int, review: AdReview):
     
     return {"message": f"Advertise ID {advertise_id} has been updated to status '{review.status}'"}
 
-
-#API 7
 @app.get("/support/reports")
 async def get_ad_reports():
     cursor.execute("""
@@ -79,7 +116,6 @@ async def get_ad_reports():
     
     return response
 
-#API for observing user's profile
 @app.get("/user/{user_id}", response_model=UserProfile)
 async def get_user_profile(user_id: int):
     cursor.execute("""
@@ -113,14 +149,8 @@ async def get_user_profile(user_id: int):
     )
     return user_profile
 
-
-
-#API to change profile features
 @app.patch("/user/{user_id}/profileChanges")
-async def update_user_profile(
-    user_id: int,
-    profile_data: UserProfileUpdate = Body(...)
-):
+async def update_user_profile(user_id: int, profile_data: UserProfileUpdate = Body(...)):
     # Check if user exists
     cursor.execute("SELECT 1 FROM user WHERE user_id = %s", (user_id,))
     if cursor.fetchone() is None:
@@ -144,9 +174,6 @@ async def update_user_profile(
     else:
         return {"message": "No updates made to the user profile"}
 
-
-
-# API to upload user profile image
 @app.post("/user/{user_id}/upload-profile-image")
 async def upload_profile_image(user_id: int, file: UploadFile = File(...)):
     file_contents = await file.read()
@@ -164,7 +191,6 @@ async def upload_profile_image(user_id: int, file: UploadFile = File(...)):
 
     return {"message": "Profile image uploaded successfully"}
 
-# # API to retrieve user profile image
 @app.get("/user/{user_id}/profile-image")
 async def get_profile_image(user_id: int):
     cursor.execute("""
