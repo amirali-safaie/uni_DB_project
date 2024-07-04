@@ -142,8 +142,12 @@ async def signup(user:userIn, password:int):
 
 #amiralis apis.....................................................................
 
-@app.post("/{publisher_id}/advertise")
-async def publish_advertise(a1: Advertise,publisher_id: int):
+@app.get("/fill-advertise/", response_class=HTMLResponse)
+async def fill_advertise(request: Request):
+   return templates.TemplateResponse("publish_advertise.html", {"request": request})
+
+@app.post("/{publisherId}/advertise")
+async def publish_advertise(a1: Advertise,publisherId: int):
     today = datetime.now()
     two_weeks_later = today + timedelta(weeks=2)
     expiration_date = two_weeks_later.strftime('%Y-%m-%d %H:%M:%S')
@@ -151,30 +155,30 @@ async def publish_advertise(a1: Advertise,publisher_id: int):
 
     cursor.execute(f"""
     INSERT INTO advertise (expiration_date, published_at, price, title, 
-    description, status, phone_number, city, publisher_id,type , deleted)
+    description, status, phone_number, city, publisherId,type , deleted)
     VALUES ('{expiration_date}', '{today}', {a1.price}, '{a1.title}', '{a1.description}', 'pending', '{a1.phone_number}',
-    '{a1.city}',{publisher_id},(SELECT cat_id FROM category WHERE name = '{a1.type_name}'), FALSE);""")
+    '{a1.city}',{publisherId},(SELECT cat_id FROM category WHERE name = '{a1.type_name}'), FALSE);""")
 
     mydb.commit()
 
     return f'advertise with {a1.title} is registered'
 
 
-@app.get("/advertise/{advertise_id}",response_class=HTMLResponse)
-async def visit_advertise(advertise_id:int,request: Request):
+@app.get("/advertise/{advertiseId}",response_class=HTMLResponse)
+async def visit_advertise(advertiseId:int,request: Request):
 
     cursor.execute(f"""
     select published_at,price,title,phone_number,city,
     (select c.name from category as c where c.cat_id = a.type)
     from advertise as a 
-    where a.ad_id = {advertise_id} and a.status = 'accepted' """)
+    where a.ad_id = {advertiseId} and a.status = 'accepted' """)
 
     result = cursor.fetchone()
     print(result)
     cursor.execute(f"""
     update advertise 
     set view = view + 1
-    where advertise.ad_id = {advertise_id}
+    where advertise.ad_id = {advertiseId}
     """)
 
     mydb.commit()
@@ -192,31 +196,31 @@ async def visit_advertise(advertise_id:int,request: Request):
     return templates.TemplateResponse("advertise_detail.html", {"request": request, "response":response})
 
 
-@app.get("/{user_id}/advertises")
-async def published_advertise_user(user_id: int):
+@app.get("/{userId}/advertises")
+async def published_advertise_user(userId: int):
 
 
     cursor.execute(f"""
     select title,phone_number,city,status,view
     from advertise 
-    where advertise.publisher_id = {user_id}""")
+    where advertise.publisher_id = {userId}""")
 
     result = cursor.fetchall()
     nl = '\n'
     return f'list of advertises: \n {result}'
 
-@app.patch("/deactivate/{user_id}")
-async def deactivate_user(user_id: int):
+@app.patch("/deactivate/{userId}")
+async def deactivate_user(userId: int):
 
 
     cursor.execute(f"""
     update user
     set active = 0
-    where user_id = {user_id}""")
+    where user_id = {userId}""")
 
     mydb.commit()
 
-    return f'user with {user_id} deactivated'
+    return f'user with {userId} deactivated'
 
 @app.post("/{user_id}/advertise/{advertise_id}")
 async def deactivate_user(user_id: int,advertise_id:int,r1:Report):
