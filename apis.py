@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from fastapi.responses import JSONResponse,HTMLResponse
 from fastapi.templating import Jinja2Templates
 #...import fastapi packages.......
-from fastapi import FastAPI,Query,Path, Body,Header, HTTPException, Request
+from fastapi import FastAPI,Query,Path, Body,Form, HTTPException, Request
 from pydantic import BaseModel, Field
 from typing import Optional ,Union,Tuple ,Annotated
 #...import models.............
@@ -142,27 +142,44 @@ async def signup(user:userIn, password:int):
 
 #amiralis apis.....................................................................
 
-@app.get("/fill-advertise/", response_class=HTMLResponse)
-async def fill_advertise(request: Request):
-   return templates.TemplateResponse("publish_advertise.html", {"request": request})
+@app.get("/fill-advertise/{publisherId}", response_class=HTMLResponse)
+async def fill_advertise(publisherId:int,request: Request):
+   return templates.TemplateResponse("publish_advertise.html", {"request": request,"publisherId":publisherId})
+
+# @app.post("/{publisherId}/advertise")
+# async def publish_advertise(a1: Advertise,publisherId: int):
+#     today = datetime.now()
+#     two_weeks_later = today + timedelta(weeks=2)
+#     expiration_date = two_weeks_later.strftime('%Y-%m-%d %H:%M:%S')
+
+
+#     cursor.execute(f"""
+#     INSERT INTO advertise (expiration_date, published_at, price, title, 
+#     description, status, phone_number, city, publisherId,type , deleted)
+#     VALUES ('{expiration_date}', '{today}', {a1.price}, '{a1.title}', '{a1.description}', 'pending', '{a1.phone_number}',
+#     '{a1.city}',{publisherId},(SELECT cat_id FROM category WHERE name = '{a1.type_name}'), FALSE);""")
+
+#     mydb.commit()
+
+#     return f'advertise with {a1.title} is registered'
+
 
 @app.post("/{publisherId}/advertise")
-async def publish_advertise(a1: Advertise,publisherId: int):
+async def publish_advertise(publisherId:int,price: int = Form(...), title: str = Form(...),description: str = Form(...),city: str = Form(...),phone_number: str = Form(...),category: str = Form(...)):
     today = datetime.now()
     two_weeks_later = today + timedelta(weeks=2)
     expiration_date = two_weeks_later.strftime('%Y-%m-%d %H:%M:%S')
 
-
     cursor.execute(f"""
     INSERT INTO advertise (expiration_date, published_at, price, title, 
-    description, status, phone_number, city, publisherId,type , deleted)
-    VALUES ('{expiration_date}', '{today}', {a1.price}, '{a1.title}', '{a1.description}', 'pending', '{a1.phone_number}',
-    '{a1.city}',{publisherId},(SELECT cat_id FROM category WHERE name = '{a1.type_name}'), FALSE);""")
+    description, status, phone_number, city, publisher_id,type , deleted)
+    VALUES ('{expiration_date}', '{today}', {price}, '{title}', '{description}', 'pending', '{phone_number}',
+    '{city}',{publisherId},(SELECT cat_id FROM category WHERE name = '{category}'), FALSE);""")
 
     mydb.commit()
 
-    return f'advertise with {a1.title} is registered'
 
+    return f'advertise with title {title} is registered'
 
 @app.get("/advertise/{advertiseId}",response_class=HTMLResponse)
 async def visit_advertise(advertiseId:int,request: Request):
