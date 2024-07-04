@@ -146,22 +146,6 @@ async def signup(user:userIn, password:int):
 async def fill_advertise(publisherId:int,request: Request):
    return templates.TemplateResponse("publish_advertise.html", {"request": request,"publisherId":publisherId})
 
-# @app.post("/{publisherId}/advertise")
-# async def publish_advertise(a1: Advertise,publisherId: int):
-#     today = datetime.now()
-#     two_weeks_later = today + timedelta(weeks=2)
-#     expiration_date = two_weeks_later.strftime('%Y-%m-%d %H:%M:%S')
-
-
-#     cursor.execute(f"""
-#     INSERT INTO advertise (expiration_date, published_at, price, title, 
-#     description, status, phone_number, city, publisherId,type , deleted)
-#     VALUES ('{expiration_date}', '{today}', {a1.price}, '{a1.title}', '{a1.description}', 'pending', '{a1.phone_number}',
-#     '{a1.city}',{publisherId},(SELECT cat_id FROM category WHERE name = '{a1.type_name}'), FALSE);""")
-
-#     mydb.commit()
-
-#     return f'advertise with {a1.title} is registered'
 
 
 @app.post("/{publisherId}/advertise")
@@ -214,7 +198,7 @@ async def visit_advertise(advertiseId:int,request: Request):
 
 
 @app.get("/{userId}/advertises")
-async def published_advertise_user(userId: int):
+async def published_advertise_user(userId: int,request: Request):
 
 
     cursor.execute(f"""
@@ -222,9 +206,8 @@ async def published_advertise_user(userId: int):
     from advertise 
     where advertise.publisher_id = {userId}""")
 
-    result = cursor.fetchall()
-    nl = '\n'
-    return f'list of advertises: \n {result}'
+    response = cursor.fetchall()
+    return templates.TemplateResponse("advertise_of_user.html", {"request": request, "response":response})
 
 @app.patch("/deactivate/{userId}")
 async def deactivate_user(userId: int):
