@@ -163,8 +163,6 @@ async def publish_advertise(publisherId:int,price: int = Form(...), title: str =
     mydb.commit()
 
 
-    return f'advertise with title {title} is registered'
-
 @app.get("/advertise/{advertiseId}",response_class=HTMLResponse)
 async def visit_advertise(advertiseId:int,request: Request):
 
@@ -206,8 +204,11 @@ async def published_advertise_user(userId: int,request: Request):
     from advertise 
     where advertise.publisher_id = {userId}""")
 
-    response = cursor.fetchall()
-    return templates.TemplateResponse("advertise_of_user.html", {"request": request, "response":response})
+    responses = cursor.fetchall()
+    print(responses)
+
+    return templates.TemplateResponse("advertises_of_user.html", {"request": request, "responses":responses})
+
 
 @app.patch("/deactivate/{userId}")
 async def deactivate_user(userId: int):

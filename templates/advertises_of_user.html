@@ -85,14 +85,13 @@
     </header>
     <!-- end header section -->
   </div>
-
   <!-- category section -->
-
+  {%for response in responses%}
   <section class="category_section layout_padding">
     <div class="container">
       <div class="heading_container">
         <h2>
-          جزئیات آگهی
+        اگهی ها
         </h2>
       </div>
       <div class="category_container">
@@ -102,27 +101,7 @@
           </div>
           <div class="detail-box">
             <h5>
-                عنوان: {{response.title}}
-            </h5>
-          </div>
-        </div>
-        <div class="box">
-          <div class="img-box">
-            <img src="images/c2.png" alt="">
-          </div>
-          <div class="detail-box">
-            <h5>
-              تاریخ انتشار :‌ {{response.published_at}}
-            </h5>
-          </div>
-        </div>
-        <div class="box">
-          <div class="img-box">
-            <img src="images/c3.png" alt="">
-          </div>
-          <div class="detail-box">
-            <h5>
-              قیمت : {{response.price}}
+                عنوان: {{response[1]}}
             </h5>
           </div>
         </div>
@@ -132,7 +111,7 @@
           </div>
           <div class="detail-box">
             <h5>
-              دسته بندی :  {{response.category}}
+               وضعیت :  {{response[3]}}
             </h5>
           </div>
         </div>
@@ -142,7 +121,7 @@
           </div>
           <div class="detail-box">
             <h5>
-              راه ارتباطی: {{response.comminucate_way}}
+              راه ارتباطی: {{response[1]}}
             </h5>
           </div>
         </div>
@@ -152,13 +131,24 @@
           </div>
           <div class="detail-box">
             <h5>
-              شهر :‌ {{response.city}}
+              شهر : {{response[2]}}
             </h5>
           </div>
         </div>
+        <div class="box">
+            <div class="img-box">
+              <img src="images/c6.png" alt="">
+            </div>
+            <div class="detail-box">
+              <h5>
+                بازدید : {{response[4]}}
+              </h5>
+            </div>
+          </div>
       </div>
     </div>
   </section>
+  {% endfor %}
   <!-- end category section -->
 
   <!-- info section -->
