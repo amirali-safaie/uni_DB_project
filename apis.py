@@ -223,19 +223,31 @@ async def deactivate_user(userId: int):
 
     return f'user with {userId} deactivated'
 
-@app.post("/{user_id}/advertise/{advertise_id}")
-async def deactivate_user(user_id: int,advertise_id:int,r1:Report):
+
+
+
+
+
+@app.get("/{userId}/fill-report/{advertiseId}")
+async def fill_report(user_id: int,advertise_id:int,request: Request):
+
+   return templates.TemplateResponse("fill_report.html", {"request": request,"advertise_id":advertise_id,"user_id":user_id} )
+
+
+
+
+@app.post("/{user_id}/report/advertise/{advertise_id}")
+async def report_advertise(user_id: int,advertise_id:int,note: str = Form(...), type_name: str = Form(...)):
 
 
     cursor.execute(f"""
     INSERT INTO report (note, status, writer_id, advertise_id, type) VALUES 
-    ('{r1.note}', 'pending', {user_id}, {advertise_id}, 
-    (SELECT cat_id FROM report_category WHERE name = '{r1.type_name}'));
+    ('{note}', 'pending', {user_id}, {advertise_id}, 
+    (SELECT cat_id FROM report_category WHERE name = '{type_name}'));
     """)
 
     mydb.commit()
 
-    return f'advertise reported by {user_id}'
 
 
 #amiralis apis.....................................................................
