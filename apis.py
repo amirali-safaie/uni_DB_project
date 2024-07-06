@@ -210,6 +210,25 @@ async def published_advertise_user(userId: int,request: Request):
     return templates.TemplateResponse("advertises_of_user.html", {"request": request, "responses":responses})
 
 
+
+
+@app.patch("/users")
+async def list_of_users(request: Request):
+
+
+    cursor.execute(f"""
+    select user_id,first_name,last_name
+    from user
+    where type = 1 and active = 1;
+    """)
+
+    responses = cursor.fetchall()
+
+    return templates.TemplateResponse("list_of_users.html", {"responses":responses})
+
+
+
+
 @app.patch("/deactivate/{userId}")
 async def deactivate_user(userId: int):
 
