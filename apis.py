@@ -229,7 +229,7 @@ async def list_of_users(request: Request):
 
 
 
-@app.patch("/deactivate/{userId}")
+@app.post("/deactivate/{userId}")
 async def deactivate_user(userId: int):
 
 
@@ -239,9 +239,6 @@ async def deactivate_user(userId: int):
     where user_id = {userId}""")
 
     mydb.commit()
-
-    return f'user with {userId} deactivated'
-
 
 
 
