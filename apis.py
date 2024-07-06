@@ -212,7 +212,7 @@ async def published_advertise_user(userId: int,request: Request):
 
 
 
-@app.patch("/users")
+@app.get("/users")
 async def list_of_users(request: Request):
 
 
@@ -224,7 +224,7 @@ async def list_of_users(request: Request):
 
     responses = cursor.fetchall()
 
-    return templates.TemplateResponse("list_of_users.html", {"responses":responses})
+    return templates.TemplateResponse("list_of_users.html", {"request":request,"responses":responses})
 
 
 
