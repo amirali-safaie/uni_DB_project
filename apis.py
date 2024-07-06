@@ -239,7 +239,8 @@ async def deactivate_user(userId: int):
     where user_id = {userId}""")
 
     mydb.commit()
-
+     
+    return "deactivated"
 
 
 
