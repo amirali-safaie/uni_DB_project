@@ -35,20 +35,20 @@ cursor = mydb.cursor() # create an instance of cursor class to execute mysql com
 #Hossein apis.......................................................................
 @app.get("/advertises")  #number 14
 async def list_of_advertises(request: Request):
-    cursor.execute(f"select ad_id,price,title from advertise ")
+    cursor.execute(f"select ad_id,price,title from advertise where deleted = FALSE ")
     responses = cursor.fetchall()
     return templates.TemplateResponse("show_advertise_list.html", {"request": request,"responses":responses})
 
 
 
-
-
-@app.get("/rejectAd")  #number 14
-async def reject(advertiseId:int):
+#number 14
+@app.post("/rejectAd/{advertiseId}")
+async def reject(advertiseId:int,request:Request):
     cursor.execute(f"update advertise set deleted=TRUE where ad_id={advertiseId}")
     mydb.commit()
-    return {"message": f"the advertise {advertiseId} deleted"}
-
+    cursor.execute(f"select ad_id,price,title from advertise where deleted = FALSE ")
+    responses = cursor.fetchall()
+    return templates.TemplateResponse("show_advertise_list.html", {"request": request,"responses":responses})
 
 @app.post("/addShop") #number 11
 async def addShop(shop : Shop):
