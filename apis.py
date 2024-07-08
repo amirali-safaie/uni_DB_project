@@ -33,6 +33,16 @@ cursor = mydb.cursor() # create an instance of cursor class to execute mysql com
 
 
 #Hossein apis.......................................................................
+@app.get("/advertises")  #number 14
+async def list_of_advertises(request: Request):
+    cursor.execute(f"select ad_id,price,title from advertise ")
+    responses = cursor.fetchall()
+    return templates.TemplateResponse("show_advertise_list.html", {"request": request,"responses":responses})
+
+
+
+
+
 @app.get("/rejectAd")  #number 14
 async def reject(advertiseId:int):
     cursor.execute(f"update advertise set deleted=TRUE where ad_id={advertiseId}")
