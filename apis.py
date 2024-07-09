@@ -60,7 +60,7 @@ async def fill_shop(request: Request,founderId:int):
 
 
 @app.post("/addShop/{founderId}") #number 11
-async def addShop(founderId:int,city: str = Form(...), address: str = Form(...),name :str= Form(...)):
+async def addShop(founderId:int,request:Request,city: str = Form(...), address: str = Form(...),name :str= Form(...)):
     isFound = False
     cursor.execute("select cityName from city")
     records = cursor.fetchall()
@@ -83,7 +83,7 @@ async def addShop(founderId:int,city: str = Form(...), address: str = Form(...),
 """, (founderId, name, address, city))
 
     mydb.commit()
-    return {"message": "shop added succesfully"}
+    return templates.TemplateResponse("fill_add_shop.html", {"request": request,'founderId':founderId})
      
 
 @app.get("/getMostReceantlyAds")   #number 5
