@@ -35,7 +35,7 @@ cursor = mydb.cursor() # create an instance of cursor class to execute mysql com
 #Hossein apis.......................................................................
 @app.get("/advertises")  #number 14
 async def list_of_advertises(request: Request):
-    cursor.execute(f"select ad_id,price,title from advertise where deleted = FALSE ")
+    cursor.execute(f"select ad_id,price,title from advertise where deleted = {0} ")
     responses = cursor.fetchall()
     return templates.TemplateResponse("show_advertise_list.html", {"request": request,"responses":responses})
 
@@ -44,9 +44,9 @@ async def list_of_advertises(request: Request):
 #number 14
 @app.post("/rejectAd/{advertiseId}")
 async def reject(advertiseId:int,request:Request):
-    cursor.execute(f"update advertise set deleted=TRUE where ad_id={advertiseId}")
+    cursor.execute(f"update advertise set deleted={1} where ad_id={advertiseId}")
     mydb.commit()
-    cursor.execute(f"select ad_id,price,title from advertise where deleted = FALSE ")
+    cursor.execute(f"select ad_id,price,title from advertise where deleted = {0} ")
     responses = cursor.fetchall()
     return templates.TemplateResponse("show_advertise_list.html", {"request": request,"responses":responses})
 
@@ -86,16 +86,12 @@ async def addShop(founderId:int,request:Request,city: str = Form(...), address: 
     return templates.TemplateResponse("fill_add_shop.html", {"request": request,'founderId':founderId})
      
 
-@app.get("/getMostReceantlyAds")   #number 5
-async def get():
-     cursor.execute("select * from advertise where deleted = FALSE   and status='accepted' order by published_at desc limit 5")
-     records = cursor.fetchall()
-     listOfAdvertis = []
-     for x in records:
-          ad = advertiseOut(ad_id=x[0], published_at=x[2], price=x[3], title=x[4], desc=x[5], phone_number=x[7], city=x[8], publisher_id=x[9], cat_id=x[12])
-          listOfAdvertis.append(ad)
-          
-     return {"list of advertises" : listOfAdvertis}
+@app.get("/getMostReceantlyAds")  
+async def get_most(request:Request):
+    cursor.execute(f"select ad_id,title,price from advertise where status='accepted' order by published_at desc limit 5")
+    records = cursor.fetchall()
+    print(records)
+    return templates.TemplateResponse("show_most_advertise.html", {"request": request,'responses':records})
 
 
 @app.get("/filterAdvertise")  #number 8
@@ -177,7 +173,7 @@ async def publish_advertise(publisherId:int,price: int = Form(...), title: str =
     INSERT INTO advertise (expiration_date, published_at, price, title, 
     description, status, phone_number, city, publisher_id,type , deleted)
     VALUES ('{expiration_date}', '{today}', {price}, '{title}', '{description}', 'pending', '{phone_number}',
-    '{city}',{publisherId},(SELECT cat_id FROM category WHERE name = '{category}'), FALSE);""")
+    '{city}',{publisherId},(SELECT cat_id FROM category WHERE name = '{category}'), {0});""")
 
     mydb.commit()
 
