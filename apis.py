@@ -50,13 +50,22 @@ async def reject(advertiseId:int,request:Request):
     responses = cursor.fetchall()
     return templates.TemplateResponse("show_advertise_list.html", {"request": request,"responses":responses})
 
-@app.post("/addShop") #number 11
-async def addShop(shop : Shop):
+
+@app.get("/fill-shop/{founderId}") #number 14
+async def fill_shop(request: Request,founderId:int):
+    return templates.TemplateResponse("fill_add_shop.html", {"request": request,'founderId':founderId})
+
+
+
+
+
+@app.post("/addShop/{founderId}") #number 11
+async def addShop(founderId:int,city: str = Form(...), address: str = Form(...),name :str= Form(...)):
     isFound = False
     cursor.execute("select cityName from city")
     records = cursor.fetchall()
     for x in records:
-        if(shop.city == x[0]):  
+        if(city == x[0]):  
             isFound = True
             break
     if(not isFound): # incorrect city in input
@@ -65,13 +74,13 @@ async def addShop(shop : Shop):
     cursor.execute("select founder_id from shop")
     records = cursor.fetchall()
     for x in records:
-         if(x[0] == shop.founderId):   #find the user that found the shop
+         if(x[0] == founderId):   #find the user that found the shop
             raise HTTPException(status_code=400, detail="you have already shop")    
 
     cursor.execute("""
     INSERT INTO shop (founder_id, name, address, city) 
     VALUES (%s, %s, %s, %s)
-""", (shop.founderId, shop.name, shop.address, shop.city))
+""", (founderId, name, address, city))
 
     mydb.commit()
     return {"message": "shop added succesfully"}
