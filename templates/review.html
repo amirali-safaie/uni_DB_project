@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Advertisements</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Review Advertisements</h1>
+        <nav>
+            <a href="/">Home</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Review Advertisement Status</h2>
+        <form id="review-ad-form">
+            <label for="advertise-id">Advertise ID:</label>
+            <input type="number" id="advertise-id" name="advertise_id" required>
+            <label for="status">Status:</label>
+            <select id="status" name="status" required>
+                <option value="accepted">Accepted</option>
+                <option value="rejected">Rejected</option>
+            </select>
+            <button type="submit">Update Status</button>
+        </form>
+        <div id="review-message"></div>
+    </main>
+    <footer>
+        <p>&copy; 2024 User Management System</p>
+    </footer>
+    <script src="/static/review.js"></script>
+</body>
+</html>
