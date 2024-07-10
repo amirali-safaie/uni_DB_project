@@ -4,7 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <!-- Internal CSS -->
+    <style>
+        /* Basic Reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            padding: 20px;
+        }
+
+        header, footer {
+            background-color: #333;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        button {
+            display: block;
+            width: 100%; /* Make buttons full width */
+            padding: 10px;
+            margin: 10px auto;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 16px; /* Adjust font size for better readability */
+        }
+
+        @media (min-width: 768px) { /* Tablet and Desktop */
+            body {
+                padding: 30px;
+            }
+            button {
+                font-size: 18px; /* Larger font size for larger screens */
+            }
+        }
+
+        @media (min-width: 1024px) { /* Desktop */
+            body {
+                padding: 40px;
+            }
+            button {
+                font-size: 20px; /* Even larger font size for very large screens */
+            }
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -20,3 +76,4 @@
     </footer>
 </body>
 </html>
+
