@@ -12,8 +12,8 @@ from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
 from pydantic import BaseModel, Field, constr, EmailStr
 from typing import Optional, Union, Tuple
-from models import AdReview, UserProfile, UserProfileUpdate
-
+from models import AdReview, UserProfile, UserProfileUpdate,userIn
+import redis 
 # Import pass from env variable
 load_dotenv()
 mysql_password = os.getenv('mysql_password')
